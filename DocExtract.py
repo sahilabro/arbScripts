@@ -1,5 +1,6 @@
 from docx import Document
 import docx
+import csv
 from docx import Document
 from docx.document import Document as _Document
 from docx.oxml.text.paragraph import CT_P
@@ -7,6 +8,14 @@ from docx.oxml.table import CT_Tbl
 from docx.table import _Cell, Table
 from docx.text.paragraph import Paragraph
 
+################################################################
+#Change document name here
+################################################################
+documentname = 'IAG Test2 Infrastructure Design v0.4.docx'
+################################################################
+
+
+document = Document(documentname)
 
 def iter_block_items(parent):
     """
@@ -31,11 +40,10 @@ def iter_block_items(parent):
             yield Table(child, parent)
 
 
-document = Document('IAG Test2 Infrastructure Design v0.4.docx')
+
 iters = iter_block_items(document)
 a = 0
 b = 0
-i= 0
 host = ''
 masterlist = []
 for block in iters:
@@ -55,11 +63,22 @@ for block in iters:
         #print([x.text for x in [cell for cell in block.column_cells(0)]][1::])
         forbiddenfruit = [x.text for x in [cell for cell in block.column_cells(0)]][1::]
         forbiddenfruit.append(host)
-        masterlist.append(forbiddenfruit)
-        i += 1
+        if set(forbiddenfruit) not in masterlist: masterlist.append(set(forbiddenfruit))
         a = 0
 
     #print(block.text if isinstance(block, Paragraph) else '<table>')
-print(masterlist)
+
+with open(documentname +'.csv', 'w') as csvfile:
+	spamwriter = csv.writer(csvfile, delimiter=',')#,
+	spamwriter.writerow(['Elements in the same row cannot exist on the same box'])
 
 
+
+
+def writeCSV(hosts):
+	with open(documentname +'.csv', 'a',newline='') as csvfile:
+		spamwriter = csv.writer(csvfile, delimiter=',')#,
+		spamwriter.writerow(hosts)
+
+for tup in masterlist:
+    if tup != '': writeCSV(tup)
